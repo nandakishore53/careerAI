@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Briefcase,
@@ -13,9 +14,22 @@ import {
   Target,
   Trophy,
   Brain,
+  Calendar,
+  Clock,
+  History,
 } from "lucide-react";
 
 export default function Dashboard() {
+  const [progress, setProgress] = useState(0);
+
+  // Animate progress bar on load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setProgress(75); // Target progress
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background px-6 py-10">
       {/* Top section: Heading left, Level & Schedule right */}
@@ -32,7 +46,7 @@ export default function Dashboard() {
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
             {/* Career Goals Achieved */}
-            <div className="flex flex-col items-start bg-gray-100 p-3 rounded-lg">
+            <div className="flex flex-col items-start bg-gray-100 p-3 rounded-lg transition-transform transform hover:scale-105 hover:shadow-md">
               <div className="flex items-center gap-2 text-blue-500">
                 <Briefcase className="h-5 w-5" />
                 <span className="text-sm font-medium">
@@ -44,7 +58,7 @@ export default function Dashboard() {
             </div>
 
             {/* Skills Learned */}
-            <div className="flex flex-col items-start bg-gray-100 p-3 rounded-lg">
+            <div className="flex flex-col items-start bg-gray-100 p-3 rounded-lg transition-transform transform hover:scale-105 hover:shadow-md">
               <div className="flex items-center gap-2 text-purple-500">
                 <Target className="h-5 w-5" />
                 <span className="text-sm font-medium">Skills Learned</span>
@@ -54,7 +68,7 @@ export default function Dashboard() {
             </div>
 
             {/* Interviews Passed */}
-            <div className="flex flex-col items-start bg-gray-100 p-3 rounded-lg">
+            <div className="flex flex-col items-start bg-gray-100 p-3 rounded-lg transition-transform transform hover:scale-105 hover:shadow-md">
               <div className="flex items-center gap-2 text-yellow-500">
                 <ClipboardCheck className="h-5 w-5" />
                 <span className="text-sm font-medium">Interviews Passed</span>
@@ -64,7 +78,7 @@ export default function Dashboard() {
             </div>
 
             {/* Job Offers */}
-            <div className="flex flex-col items-start bg-gray-100 p-3 rounded-lg">
+            <div className="flex flex-col items-start bg-gray-100 p-3 rounded-lg transition-transform transform hover:scale-105 hover:shadow-md">
               <div className="flex items-center gap-2 text-pink-500">
                 <Trophy className="h-5 w-5" />
                 <span className="text-sm font-medium">Job Offers</span>
@@ -76,32 +90,35 @@ export default function Dashboard() {
         </div>
 
         {/* Right: Level & Schedule Session */}
-        <div className="flex items-center gap-4">
+        <div className="relative flex items-center gap-4">
           <span className="text-sm font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
             Level 7 Achiever
           </span>
 
-          <button className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            Schedule Session
-          </button>
+          {/* Dropdown for Schedule Session */}
+          <div className="group relative">
+            <button className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+              <Calendar className="h-4 w-4" />
+              Schedule Session
+            </button>
+            <div className="absolute right-0 mt-2 hidden w-48 rounded-lg bg-white shadow-lg group-hover:block">
+              <ul className="py-2 text-sm text-gray-700">
+                <li className="px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer">
+                  <Calendar className="h-4 w-4 text-blue-500" /> Book a session
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer">
+                  <Clock className="h-4 w-4 text-green-500" /> Upcoming sessions
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer">
+                  <History className="h-4 w-4 text-purple-500" /> Session history
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
+              </div>
 
-      {/* Progress card: smaller */}
+      {/* Progress card: now animated */}
       <Card className="mb-8 p-4">
         <CardHeader>
           <CardTitle className="text-lg">Your Career Journey Progress</CardTitle>
@@ -110,17 +127,17 @@ export default function Dashboard() {
           <p className="text-sm">
             You're making excellent progress! Keep up the momentum.
           </p>
-          <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+          <div className="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
             <div
-              className="bg-blue-500 h-3 rounded-full"
-              style={{ width: "75%" }}
+              className="bg-blue-500 h-3 rounded-full transition-all duration-1000 ease-out"
+              style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-right text-xs mt-1 font-medium">75%</p>
+          <p className="text-right text-xs mt-1 font-medium">{progress}%</p>
         </CardContent>
       </Card>
 
-      {/* Dashboard cards */}
+      {/* Dashboard cards (unchanged) */}
       <div className="grid md:grid-cols-3 gap-6">
         {/* Career Pathway */}
         <Link href="/dashboard/career-pathway">
@@ -273,3 +290,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

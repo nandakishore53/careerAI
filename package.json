@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@netlify/plugin-nextjs": "^5.13.3",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/firebase": "^2.4.32",
     "@types/node": "^20",
