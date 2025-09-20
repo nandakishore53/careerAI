@@ -1,23 +1,44 @@
+// src/app/api/mock-interview/route.ts
 import { NextResponse } from "next/server";
+import { sql } from "@/lib/db";
 import { openai } from "@/lib/openai";
-import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const { question, answer } = await req.json();
+  try {
+    const { question, answer } = await req.json();
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "You are an HR interviewer. Score and give feedback." },
-      { role: "user", content: `Q: ${question}\nA: ${answer}` },
-    ],
-  });
+    if (!question || !answer) {
+      return NextResponse.json(
+        { error: "Question and answer are required" },
+        { status: 400 }
+      );
+    }
 
-  const feedback = completion.choices[0].message?.content || "No feedback";
+    // Get AI feedback
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "You are an HR interviewer. Score the answer and give feedback.",
+        },
+        { role: "user", content: `Q: ${question}\nA: ${answer}` },
+      ],
+    });
 
-  await prisma.mockInterview.create({
-    data: { question, answer, feedback },
-  });
+    const feedback =
+      completion.choices[0].message?.content || "No feedback generated";
 
-  return NextResponse.json({ feedback });
+    // Save result to Neon
+    const result = await sql`
+      INSERT INTO mock_interviews (question, answer, feedback)
+      VALUES (${question}, ${answer}, ${feedback})
+      RETURNING id, question, answer, feedback
+    `;
+
+    return NextResponse.json({ success: true, interview: result[0] });
+  } catch (err: any) {
+    console.error("Mock interview error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

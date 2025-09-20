@@ -1,27 +1,46 @@
+// src/app/api/career-pathway/route.ts
 import { NextResponse } from "next/server";
-import { openai } from "@/lib/openai";
-import { prisma } from "@/lib/prisma";
+import { sql } from "@/lib/db";
 
+// GET /api/career-pathway
+// Fetch all available career pathways
+export async function GET() {
+  try {
+    const pathways = await sql`
+      SELECT id, title, description, steps 
+      FROM career_pathways
+      ORDER BY id ASC
+    `;
 
+    return NextResponse.json({ pathways });
+  } catch (err: any) {
+    console.error("Career pathway fetch error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+// POST /api/career-pathway
+// Add a new career pathway
 export async function POST(req: Request) {
-  const { profile } = await req.json();
+  try {
+    const { title, description, steps } = await req.json();
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "You are a career coach. Generate a step-by-step roadmap." },
-      { role: "user", content: JSON.stringify(profile) },
-    ],
-  });
+    if (!title || !description || !steps) {
+      return NextResponse.json(
+        { error: "Title, description, and steps are required" },
+        { status: 400 }
+      );
+    }
 
-  const roadmap = completion.choices[0].message?.content || "No roadmap generated";
+    const result = await sql`
+      INSERT INTO career_pathways (title, description, steps)
+      VALUES (${title}, ${description}, ${steps})
+      RETURNING id, title, description, steps
+    `;
 
-  await prisma.careerPathway.create({
-    data: {
-      name: profile.name,
-      roadmap,
-    },
-  });
-
-  return NextResponse.json({ roadmap });
+    return NextResponse.json({ success: true, pathway: result[0] });
+  } catch (err: any) {
+    console.error("Career pathway insert error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

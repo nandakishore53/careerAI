@@ -1,16 +1,13 @@
+// src/app/api/test/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { sql } from "@/lib/db";
 
 export async function GET() {
-  // Prisma query
-  const prismaUser = await prisma.user.findFirst();
-
-  // Raw SQL query
-  const rawUsers = await sql`SELECT COUNT(*) FROM users`;
-
-  return NextResponse.json({
-    firstUser: prismaUser,
-    userCount: rawUsers[0].count,
-  });
+  try {
+    const rows = await sql`SELECT count(*)::int as cnt FROM users`;
+    const count = rows?.[0]?.cnt ?? 0;
+    return NextResponse.json({ userCount: count });
+  } catch (err) {
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
 }

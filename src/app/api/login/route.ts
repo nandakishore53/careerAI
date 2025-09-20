@@ -1,7 +1,11 @@
+// src/app/api/login/route.ts
 import { NextResponse } from "next/server";
-import sql from "@/lib/db";
+import { neon } from "@neondatabase/serverless";
 import bcrypt from "bcryptjs";
 
+const sql = neon(process.env.DATABASE_URL!);
+
+// POST /api/login
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
@@ -13,18 +17,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // Find user in DB
-    const result = await sql`SELECT * FROM users WHERE email = ${email}`;
+    // Check if user exists
+    const result = await sql`
+      SELECT id, email, password FROM users WHERE email = ${email} LIMIT 1
+    `;
+    const user = result[0];
 
-    if (result.length === 0) {
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const user = result[0];
-
-    // Compare password
+    // Compare hashed password
     const isValid = await bcrypt.compare(password, user.password);
-
     if (!isValid) {
       return NextResponse.json(
         { error: "Invalid credentials" },
@@ -32,12 +36,22 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      user: { id: user.id, email: user.email },
-    });
-  } catch (err: any) {
+    // ✅ Success (no JWT, just return user info)
+    return NextResponse.json(
+      {
+        message: "Login successful",
+        user: {
+          id: user.id,
+          email: user.email,
+        },
+      },
+      { status: 200 }
+    );
+  } catch (err) {
     console.error("Login error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }
