@@ -318,15 +318,6 @@ This project is developed for **Smart India Hackathon 2025** and is licensed und
 - [User Guide](docs/user-guide.md)
 - [Presentation Deck](docs/presentation.pdf)
 
-## 📞 Contact & Support
-
-For queries related to this SIH 2025 project:
-
-- **Email:** alpha-team@sih2025.ac.in
-- **Issue Tracker:** [GitHub Issues](https://github.com/alpha-team-sih2025/allcareer-ai/issues)
-- **Documentation:** [Project Wiki](https://github.com/alpha-team-sih2025/allcareer-ai/wiki)
-
----
 
 <div align="center">
 
