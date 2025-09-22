@@ -1,29 +1,29 @@
 // src/app/api/career-mentor/route.ts
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
-import { saveMentorChat } from "@/lib/db";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+import { queryCohere } from "@/lib/cohere";
 
 export async function POST(req: Request) {
   try {
-    const { userId, question } = await req.json();
-    if (!question) return NextResponse.json({ error: "Missing question" }, { status: 400 });
+    const { message } = await req.json();
+    if (!message) {
+      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "You are a career coach. Provide clear, actionable advice." },
-        { role: "user", content: question },
-      ],
-    });
+    // Call Cohere API
+    const reply = await queryCohere(
+      `You are a career mentor. Answer this query: ${message}`
+    );
 
-    const answer = completion?.choices?.[0]?.message?.content ?? "No response";
-    await saveMentorChat(userId ?? null, question, answer);
-
-    return NextResponse.json({ answer });
+    return NextResponse.json({ reply });
   } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ error: err.message ?? String(err) }, { status: 500 });
+    console.error("Career mentor API error:", err);
+    // Fallback response if API fails
+    const fallback = `
+1. Learn basics of your field
+2. Build small projects
+3. Network with professionals
+4. Apply for internships
+`;
+    return NextResponse.json({ reply: fallback }, { status: 200 });
   }
 }

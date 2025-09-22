@@ -1,44 +1,45 @@
 // src/app/api/mock-interview/route.ts
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/db";
-import { openai } from "@/lib/openai";
+import { queryCohere } from "@/lib/cohere";
 
 export async function POST(req: Request) {
   try {
-    const { question, answer } = await req.json();
+    const { profile, answer } = await req.json();
 
-    if (!question || !answer) {
+    if (!profile) {
       return NextResponse.json(
-        { error: "Question and answer are required" },
+        { error: "User profile is required." },
         { status: 400 }
       );
     }
 
-    // Get AI feedback
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "You are an HR interviewer. Score the answer and give feedback.",
-        },
-        { role: "user", content: `Q: ${question}\nA: ${answer}` },
-      ],
-    });
+    // Step 1: Generate a question based on user profile
+    const questionPrompt = `
+You are an interviewer. The user profile is:
+${JSON.stringify(profile)}
+Generate 1 relevant interview question for this user.
+Return only the question text.
+`;
+    const question = await queryCohere(questionPrompt);
 
-    const feedback =
-      completion.choices[0].message?.content || "No feedback generated";
+    // Step 2: If the user has provided an answer, evaluate it
+    let feedback = "";
+    if (answer) {
+      const feedbackPrompt = `
+Question: ${question}
+Answer: ${answer}
+Provide feedback and score (1-10) for the answer.
+Format as: Feedback: ... Score: ...
+`;
+      feedback = await queryCohere(feedbackPrompt);
+    }
 
-    // Save result to Neon
-    const result = await sql`
-      INSERT INTO mock_interviews (question, answer, feedback)
-      VALUES (${question}, ${answer}, ${feedback})
-      RETURNING id, question, answer, feedback
-    `;
-
-    return NextResponse.json({ success: true, interview: result[0] });
+    return NextResponse.json({ question, feedback });
   } catch (err: any) {
     console.error("Mock interview error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to generate question." },
+      { status: 500 }
+    );
   }
 }
