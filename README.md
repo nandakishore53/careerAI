@@ -294,18 +294,6 @@ We welcome contributions from the community! Please see our contributing guideli
 - [Mentor Name] - [Organization]
 - [Mentor Name] - [Organization]
 
-## 📊 Project Status
-
-| Component | Status | Version |
-|-----------|--------|---------|
-| Core Platform | ✅ Completed | v1.0 |
-| AI Assessment | ✅ Completed | v1.0 |
-| Resume Builder | ✅ Completed | v1.0 |
-| Interview Simulator | 🔄 In Progress | v0.8 |
-| Mentor Network | 🔄 In Progress | v0.7 |
-| Mobile App | ⏳ Planned | v2.0 |
-
-
 ## 📄 License
 
 This project is developed for **Smart India Hackathon 2025** and is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
