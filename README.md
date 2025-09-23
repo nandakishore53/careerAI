@@ -279,21 +279,6 @@ We welcome contributions from the community! Please see our contributing guideli
 - Write meaningful commit messages
 - Add JSDoc comments for complex functions
 
-## 👥 Team Alpha
-
-| Role | Name | Contribution |
-|------|------|--------------|
-| Team Lead | [Name] | Project Management & Full Stack |
-| AI Developer | [Name] | AI Integration & Algorithms |
-| Frontend Lead | [Name] | UI/UX & Component Development |
-| Backend Developer | [Name] | API Development & Database |
-| UI/UX Designer | [Name] | Design System & User Experience |
-| DevOps Engineer | [Name] | Deployment & Infrastructure |
-
-### Mentors
-- [Mentor Name] - [Organization]
-- [Mentor Name] - [Organization]
-
 ## 📄 License
 
 This project is developed for **Smart India Hackathon 2025** and is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
